@@ -1,0 +1,1 @@
+insert into client_app(name,key,email,password) values('ima-store','sdf87872rbsdfpq3RASDFSDKFK!S0DF233sdfksflkjhJYGJHbmblsfs873sdfsd','imafilipinofoodstore.webmail@gmail.com','imastore123');
