@@ -2,8 +2,10 @@ package com.bagnesapps.email.service;
 
 import java.util.Properties;
 
+import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -24,14 +26,27 @@ public class MailService {
 	
 	public void init() {
 		mailServerProperties = System.getProperties();
-		mailServerProperties.put("mail.smtp.port", "587");
-		mailServerProperties.put("mail.smtp.auth", "true");
-		mailServerProperties.put("mail.smtp.starttls.enable", "true");
+//		mailServerProperties.put("mail.smtp.port", "587");
+//		mailServerProperties.put("mail.smtp.auth", "true");
+//		mailServerProperties.put("mail.smtp.starttls.enable", "true");
+		
+		mailServerProperties.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
+		mailServerProperties.put("mail.smtp.socketFactory.port", "465"); //SSL Port
+		mailServerProperties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory"); //SSL Factory Class
+		mailServerProperties.put("mail.smtp.auth", "true"); //Enabling SMTP Authentication
+		mailServerProperties.put("mail.smtp.port", "465"); //SMTP Port
 	}
 	
 	public void sendEmail(String to, String cc, String subject, String body, String replyTo, ClientApp clientApp) throws AddressException, MessagingException {
 		this.init();
-		mailSession = Session.getDefaultInstance(mailServerProperties, null);
+		
+		Authenticator auth = new Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(clientApp.getEmail(), clientApp.getPassword());
+			}
+		};
+		
+		mailSession = Session.getDefaultInstance(mailServerProperties, auth);
 		generatedMailMessage = new MimeMessage(mailSession);
 		generatedMailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 		if(StringUtils.isNoneBlank(cc)) {
@@ -42,9 +57,10 @@ public class MailService {
 		}		
 		generatedMailMessage.setSubject(subject);
 		generatedMailMessage.setContent(body, "text/html");
-		Transport transport = mailSession.getTransport("smtp");
-		transport.connect("smtp.gmail.com", clientApp.getEmail(), clientApp.getPassword());
-		transport.sendMessage(generatedMailMessage, generatedMailMessage.getAllRecipients());
-		transport.close();
+//		Transport transport = mailSession.getTransport("smtp");
+//		transport.connect("smtp.gmail.com", clientApp.getEmail(), clientApp.getPassword());
+//		transport.sendMessage(generatedMailMessage, generatedMailMessage.getAllRecipients());
+//		transport.close();
+		Transport.send(generatedMailMessage, generatedMailMessage.getAllRecipients());
 	}
 }
